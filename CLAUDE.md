@@ -121,6 +121,19 @@ Projects use VS Code devcontainers (`.devcontainer/devcontainer.json`) to:
 - Uses virtiofs for fast file sync (Docker Desktop 4.25+)
 - Traefik runs natively
 - `.localhost` domains work out of the box
+- **IMPORTANT:** After generating certificates with `setup-local-certs.sh`, existing containers must be recreated to pick up HTTPS config:
+  ```bash
+  cd <project-directory>
+  docker compose up -d  # Recreates containers with updated labels
+  ```
+- **Certificate patterns:** mkcert doesn't support `*.*.localhost` patterns. For multi-level subdomains like `api.project.localhost`, add explicit patterns to `setup-local-certs.sh`:
+  ```bash
+  mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem \
+    "*.localhost" \
+    "*.devbox.localhost" \    # Covers api.devbox.localhost, py.devbox.localhost, etc.
+    "*.yourproject.localhost" \
+    localhost 127.0.0.1 ::1
+  ```
 
 ### Windows (WSL2)
 - **CRITICAL:** All repos must be in WSL2 filesystem (`/home/<user>/projects`), never in `/mnt/c/`
@@ -210,6 +223,12 @@ If file changes aren't reflected:
 - Check volume mounts in `docker-compose.yml`
 
 If HTTPS certificate is invalid in browser:
+- **First**: Verify the certificate covers your subdomain pattern. Check with:
+  ```bash
+  openssl x509 -in docker/reverse-proxy/certs/local-cert.pem -noout -text | grep -A 5 "Subject Alternative Name"
+  ```
+- If your domain pattern is missing, edit `docker/reverse-proxy/setup-local-certs.sh` to add it (e.g., `"*.yourproject.localhost"`), then re-run the script
+- After regenerating certs, restart Traefik: `cd docker/reverse-proxy && docker compose restart`
 - Clear Chrome SSL cache: `chrome://net-internals/#sockets` → "Flush socket pools"
 - Delete HSTS entry: `chrome://net-internals/#hsts` → delete domain
 - Verify mkcert CA is installed: `mkcert -install`

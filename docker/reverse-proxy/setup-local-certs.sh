@@ -33,14 +33,30 @@ mkcert -install
 # Create certs directory
 mkdir -p certs
 
-# Generate wildcard certificate for *.localhost
-echo "Generating wildcard certificate for *.localhost..."
-mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem "*.localhost" "*.*.localhost" localhost 127.0.0.1 ::1
+# Generate wildcard certificate for *.localhost and common project patterns
+echo "Generating wildcard certificate for *.localhost and project subdomains..."
+mkcert -cert-file certs/local-cert.pem -key-file certs/local-key.pem \
+  "localhost" \
+  "*.localhost" \
+  "n8n.localhost" \
+  "*.devbox.localhost" \
+  "*.myproject.localhost" \
+  "127.0.0.1" \
+  "::1"
 
+echo ""
 echo "✓ Certificates created successfully!"
 echo "  - Certificate: certs/local-cert.pem"
 echo "  - Key: certs/local-key.pem"
 echo ""
+echo "Covered domains:"
+echo "  - localhost"
+echo "  - *.localhost"
+echo "  - *.devbox.localhost"
+echo "  - *.myproject.localhost"
+echo ""
+echo "To add more project domains, edit this script and add patterns like:"
+echo "  \"*.yourproject.localhost\""
+echo ""
 echo "Next steps:"
-echo "  1. Update docker-compose.yml to use the certificates"
-echo "  2. Restart Traefik: docker compose down && docker compose up -d"
+echo "  1. Restart Traefik: docker compose restart"

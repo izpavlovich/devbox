@@ -94,6 +94,11 @@ docker compose up -d
 - HTTP requests automatically redirect to HTTPS
 - DNS: `*.localhost` domains automatically resolve to `127.0.0.1` (RFC 6761)
 
+**Certificate coverage:**
+- Wildcard `*.localhost` covers one level: `project.localhost` ✅
+- Multi-level subdomains need explicit patterns: `*.devbox.localhost` covers `api.devbox.localhost` ✅
+- mkcert limitation: `*.*.localhost` is invalid - add specific project patterns to `setup-local-certs.sh`
+
 ### 2. Per-Project Compose Files
 
 Each project gets its own `docker-compose.yml` with:
@@ -209,6 +214,11 @@ docker compose --profile py --profile net --profile go --profile frontend --prof
 - Uses **virtiofs** for fast file sync (Docker Desktop 4.25+)
 - If you experience slowness with large repos, consider [Mutagen](https://mutagen.io/)
 - Traefik runs natively on macOS Docker Desktop
+- **After setting up HTTPS:** Existing containers need to be recreated to use HTTPS:
+  ```bash
+  cd <project-directory>
+  docker compose up -d  # Recreates with updated Traefik labels
+  ```
 
 ### Windows (WSL2)
 - **Always work inside WSL2 filesystem** (`\\wsl$\Ubuntu\home\<user>\projects`)
@@ -382,17 +392,29 @@ docker compose exec api-python ping db
 
 ### HTTPS certificate invalid in browser
 
-```bash
-# Verify mkcert CA is installed
-mkcert -install
+**Root cause:** Certificate doesn't cover your subdomain pattern (mkcert doesn't support `*.*.localhost`).
 
-# Clear browser cache
+```bash
+# 1. Check what domains your certificate covers
+openssl x509 -in docker/reverse-proxy/certs/local-cert.pem -noout -text | grep -A 5 "Subject Alternative Name"
+
+# 2. Add missing patterns to setup-local-certs.sh
+# Edit docker/reverse-proxy/setup-local-certs.sh and add:
+#   "*.yourproject.localhost"
+
+# 3. Regenerate certificates
+cd docker/reverse-proxy
+./setup-local-certs.sh
+
+# 4. Restart Traefik
+docker compose restart
+
+# 5. Clear browser SSL state
 # Chrome: chrome://net-internals/#sockets → "Flush socket pools"
 # Chrome: chrome://net-internals/#hsts → delete domain entry
-
 # Restart browser completely
 
-# Test certificate with curl
+# 6. Verify with curl
 curl -vI https://health.devbox.localhost 2>&1 | grep "SSL certificate"
 # Should show: "SSL certificate verify ok"
 ```
