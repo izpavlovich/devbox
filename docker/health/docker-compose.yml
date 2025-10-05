@@ -1,0 +1,20 @@
+services:
+  health-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: health-api
+    networks:
+      - edge
+    expose:
+      - "8000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.health-api.rule=Host(`health.devbox.localhost`)"
+      - "traefik.http.routers.health-api.entrypoints=web"
+      - "traefik.http.services.health-api.loadbalancer.server.port=8000"
+    restart: unless-stopped
+
+networks:
+  edge:
+    external: true
