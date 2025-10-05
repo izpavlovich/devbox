@@ -76,6 +76,11 @@ All services route through a single Traefik instance that listens on `:80` and `
 
 ```bash
 cd docker/reverse-proxy
+
+# 1. Generate local HTTPS certificates (uses mkcert)
+./setup-local-certs.sh
+
+# 2. Start Traefik
 docker compose up -d
 ```
 
@@ -84,7 +89,10 @@ docker compose up -d
 **How it works:**
 - Each project joins the shared `edge` network
 - Containers expose internal ports (no `-p` bindings)
-- Traefik routes by hostname: `http://<service>.<project>.localhost`
+- Traefik routes by hostname: `https://<service>.<project>.localhost`
+- HTTPS by default with mkcert-generated certificates
+- HTTP requests automatically redirect to HTTPS
+- DNS: `*.localhost` domains automatically resolve to `127.0.0.1` (RFC 6761)
 
 ### 2. Per-Project Compose Files
 
@@ -123,16 +131,16 @@ my-project/
 
 | Stack | Hot Reload | Internal Port | Default URL |
 |-------|-----------|---------------|-------------|
-| **.NET 8** | `dotnet watch` | 8080 | `http://api.<project>.localhost` |
-| **Python/FastAPI** | `uvicorn --reload` | 8000 | `http://py.<project>.localhost` |
-| **Go** | `air` | 8081 | `http://go.<project>.localhost` |
+| **.NET 8** | `dotnet watch` | 8080 | `https://api.<project>.localhost` |
+| **Python/FastAPI** | `uvicorn --reload` | 8000 | `https://py.<project>.localhost` |
+| **Go** | `air` | 8081 | `https://go.<project>.localhost` |
 
 ### Frontend
 
 | Stack | Hot Reload | Internal Port | Default URL |
 |-------|-----------|---------------|-------------|
-| **React/Vite** | HMR | 5173 | `http://app.<project>.localhost` |
-| **Next.js** | Fast Refresh | 3000 | `http://next.<project>.localhost` |
+| **React/Vite** | HMR | 5173 | `https://app.<project>.localhost` |
+| **Next.js** | Fast Refresh | 3000 | `https://next.<project>.localhost` |
 
 ### Databases
 
@@ -161,9 +169,9 @@ code .
 # Now you're coding inside the container with all tools available
 
 # 5. Access your services
-open http://api.myproject.localhost      # .NET API
-open http://py.myproject.localhost       # Python API
-open http://app.myproject.localhost      # React frontend
+open https://api.myproject.localhost      # .NET API
+open https://py.myproject.localhost       # Python API
+open https://app.myproject.localhost      # React frontend
 ```
 
 ### Common Commands
@@ -251,13 +259,22 @@ wsl cd ~/projects/myproject && code .
 
 ---
 
-## Example: Sample Multi-Stack Project
+## Example: Health Check API
 
-See [`docker/`](./docker/) for:
-- **Reverse proxy setup** ([`reverse-proxy/`](./docker/reverse-proxy/))
-- Sample Dockerfiles for all stacks
-- Sample `docker-compose.yml` with profiles
-- Sample `.devcontainer/` configurations
+See [`docker/health/`](./docker/health/) for a complete example showing:
+- FastAPI service with health check endpoints (`/health`, `/ready`, `/live`)
+- Dockerfile for Python service
+- docker-compose.yml with Traefik HTTPS integration
+- Access at: `https://health.devbox.localhost`
+
+**Try it:**
+```bash
+cd docker/health
+docker compose up -d --build
+curl https://health.devbox.localhost/health
+```
+
+See [`docker/reverse-proxy/`](./docker/reverse-proxy/) for the global Traefik setup with HTTPS.
 
 ---
 
@@ -363,12 +380,30 @@ docker compose exec api-python ping db
 # Should resolve to internal IP
 ```
 
+### HTTPS certificate invalid in browser
+
+```bash
+# Verify mkcert CA is installed
+mkcert -install
+
+# Clear browser cache
+# Chrome: chrome://net-internals/#sockets → "Flush socket pools"
+# Chrome: chrome://net-internals/#hsts → delete domain entry
+
+# Restart browser completely
+
+# Test certificate with curl
+curl -vI https://health.devbox.localhost 2>&1 | grep "SSL certificate"
+# Should show: "SSL certificate verify ok"
+```
+
 ---
 
 ## Resources
 
 - [Docker Compose Profiles](https://docs.docker.com/compose/profiles/)
 - [Traefik Docker Provider](https://doc.traefik.io/traefik/providers/docker/)
+- [mkcert - Local HTTPS certificates](https://github.com/FiloSottile/mkcert)
 - [VS Code Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers)
 - [Image Digest Pinning](https://docs.docker.com/engine/reference/commandline/pull/#pull-an-image-by-digest-immutable-identifier)
 - [WSL2 Best Practices](https://learn.microsoft.com/en-us/windows/wsl/filesystems)
