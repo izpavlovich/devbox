@@ -11,7 +11,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.health-api.rule=Host(`health.devbox.localhost`)"
-      - "traefik.http.routers.health-api.entrypoints=web"
+      - "traefik.http.routers.health-api.entrypoints=websecure"
+      - "traefik.http.routers.health-api.tls=true"
       - "traefik.http.services.health-api.loadbalancer.server.port=8000"
     restart: unless-stopped
 

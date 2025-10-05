@@ -1,14 +1,14 @@
 # ~/dev/reverse-proxy/docker-compose.yml
-version: "3.9"
 services:
   traefik:
     image: traefik:v3.1
     command:
       - "--providers.docker=true"
+      - "--providers.file.directory=/etc/traefik/dynamic"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
-      # (optional) local TLS via mkcert; or comment out for HTTP only:
-      - "--certificatesresolvers.dev.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--api.insecure=true"     # dashboard on :8080 inside container
     ports:
       - "80:80"
@@ -16,6 +16,8 @@ services:
       # - "8080:8080"            # enable only when you want to inspect
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/certs:ro
+      - ./traefik-dynamic.yml:/etc/traefik/dynamic/traefik-dynamic.yml:ro
     networks:
       - edge
 networks:
