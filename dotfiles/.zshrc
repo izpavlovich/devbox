@@ -159,7 +159,7 @@ if [[ -o zle ]]; then
 fi
 
 # Aliases
-alias nv="neovim"
+alias nv="nvim"
 alias ff="fzf"
 alias ccp="claude -p"
 alias lz="eza -lha --sort=Name --group-directories-first --no-permissions --no-user"

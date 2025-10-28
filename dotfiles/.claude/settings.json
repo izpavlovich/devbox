@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); current_dir=$(echo \"$input\" | jq -r '.workspace.current_dir // empty'); [ -z \"$current_dir\" ] && current_dir=$(pwd); cd \"$current_dir\" 2>/dev/null || cd \"$(pwd)\"; user=$(whoami); hostname=$(hostname -s); pwd_short=$(basename \"$current_dir\"); model_name=$(echo \"$input\" | jq -r '.model.display_name // \"Claude\"'); git_info=\"\"; if git rev-parse --git-dir > /dev/null 2>&1; then branch=$(git branch --show-current 2>/dev/null || echo \"detached\"); status=\"\"; ! git diff --quiet 2>/dev/null && status=\"${status}*\"; ! git diff --cached --quiet 2>/dev/null && status=\"${status}+\"; [ -n \"$(git ls-files --others --exclude-standard 2>/dev/null)\" ] && status=\"${status}?\"; upstream=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null); if [ -n \"$upstream\" ]; then ahead=$(git rev-list --count HEAD..$upstream 2>/dev/null || echo \"0\"); behind=$(git rev-list --count $upstream..HEAD 2>/dev/null || echo \"0\"); [ \"$behind\" != \"0\" ] && status=\"${status}↑$behind\"; [ \"$ahead\" != \"0\" ] && status=\"${status}↓$ahead\"; fi; git_info=\" git:$branch$status\"; fi; printf \"\\033[2m%s@%s:%s%s | %s\\033[0m\" \"$user\" \"$hostname\" \"$pwd_short\" \"$git_info\" \"$model_name\""
+  },
+  "alwaysThinkingEnabled": true,
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(code:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "mcp__ide__getDiagnostics"
+    ]
+  },
+}
