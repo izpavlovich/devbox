@@ -1,6 +1,9 @@
 [user]
 	email = igor@pavlovic.me
 	name = Igor Pavlovic
+[user]
+	email = igor@pavlovic.me
+	name = Igor Pavlovic
 [core]
 	excludesfile = /Users/igor/.gitignore_global
 	pager = delta
@@ -22,6 +25,6 @@
   path = /Users/igor/src/github/catppuccin/delta/catppuccin.gitconfig
 [delta]
 	navigate = true
-  features = catppuccin-macchiato
+  features = catppuccin-mocha
 [merge]
 	conflictStyle = zdiff3
