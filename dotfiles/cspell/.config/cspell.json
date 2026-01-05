@@ -6,6 +6,10 @@
     "Pavlovic",
     "nvim",
     "difftool",
-    "mergetool"
+    "mergetool",
+    "shellcheck",
+    "pyenv",
+    "antlr",
+    "certifi"
   ]
 }

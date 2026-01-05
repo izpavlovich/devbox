@@ -1,18 +1,15 @@
 [user]
 	email = igor@pavlovic.me
 	name = Igor Pavlovic
-[user]
-	email = igor@pavlovic.me
-	name = Igor Pavlovic
 [core]
-	excludesfile = /Users/igor/.gitignore_global
+	excludesfile = $HOME/.gitignore_global
 	pager = delta
 	editor = nvim
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path = 
 [mergetool "sourcetree"]
-	cmd = /Users/igor/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	cmd = $HOME/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
@@ -22,9 +19,9 @@
 [interactive]
 	diffFilter = delta --color-only
 [include]
-  path = /Users/igor/src/github/catppuccin/delta/catppuccin.gitconfig
+	path = $HOME/src/github/catppuccin/delta/catppuccin.gitconfig
 [delta]
 	navigate = true
-  features = catppuccin-mocha
+	features = catppuccin-mocha
 [merge]
 	conflictStyle = zdiff3
