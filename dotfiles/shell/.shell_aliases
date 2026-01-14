@@ -1,0 +1,22 @@
+# Common shell aliases - sourced by both bash and zsh
+
+# Navigation & listing (requires eza)
+alias l="eza -lh --sort=Name --group-directories-first --no-permissions --no-user"
+alias la="l -a"
+alias lt="eza -T --group-directories-first"
+alias cd=z
+
+# Editor shortcuts
+alias n=nvim
+
+# Utilities
+alias c=clear
+alias t=btop
+
+# Container & orchestration
+alias k=kubectl
+alias g=lazygit
+alias d=lazydocker
+
+# ANTLR
+alias antlr4='java -jar ~/antlr/antlr-4.13.1-complete.jar'

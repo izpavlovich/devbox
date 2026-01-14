@@ -1,0 +1,22 @@
+# Common shell initialization - sourced by both bash and zsh
+
+[ -n "$ZSH_VERSION" ] && CURRENT_SHELL="zsh"
+[ -n "$BASH_VERSION" ] && CURRENT_SHELL="bash"
+
+# Environment
+[ -f "$HOME/.shell_aliases" ] && . "$HOME/.shell_aliases"
+[ -f "$HOME/.local/bin/env" ] && . "$HOME/.local/bin/env"
+[[ $(uname) == "Darwin" ]] && [ -d "/opt/homebrew/opt/openjdk/bin" ] && export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
+
+# Editing
+set -o vi
+
+# Tools (loaded only if installed)
+command -v starship &>/dev/null && eval "$(starship init $CURRENT_SHELL)"
+command -v fzf &>/dev/null && eval "$(fzf --$CURRENT_SHELL)"
+command -v zoxide &>/dev/null && eval "$(zoxide init $CURRENT_SHELL)"
+
+# Auto-attach tmux for SSH sessions
+if [[ $- == *i* ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_TTY" ]]; then
+  tmux attach-session -t remote_sync || tmux new-session -s remote_sync
+fi
